@@ -1,0 +1,19 @@
+manifest:
+  self:
+    west-commands: scripts/west-commands.yml
+
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v4.0.0
+      import:
+        name-allowlist:
+          - cmsis
+          - hal_nordic
+          - mbedtls
+          - tinycrypt
+          - liblc3
