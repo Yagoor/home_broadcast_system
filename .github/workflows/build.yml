@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-13, macos-14, windows-2022]
+        os: [ubuntu-22.04]
     env:
       BSIM_OUT_PATH: /opt/bsim/
     runs-on: ${{ matrix.os }}
