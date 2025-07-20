@@ -155,6 +155,8 @@ static K_SEM_DEFINE(sem_started, 0U, ARRAY_SIZE(streams));
 static K_SEM_DEFINE(sem_stopped, 0U, ARRAY_SIZE(streams));
 
 #define BROADCAST_SOURCE_LIFETIME 120U /* seconds */
+#define LF_ID_MSB ((BT_COMP_ID_LF >> 8) & 0xff)
+#define LF_ID_LSB ((BT_COMP_ID_LF) & 0xff)
 
 static int freq_hz;
 static int frame_duration_us;
@@ -162,6 +164,8 @@ static int frames_per_sdu;
 static int octets_per_frame;
 
 static K_SEM_DEFINE(lc3_encoder_sem, 0U, TOTAL_BUF_NEEDED);
+
+static uint8_t ad_data_1[] = {LF_ID_MSB, LF_ID_LSB, 'Z', 'e', 'p', 'h', 'y', 'r'};
 
 static void send_data(struct broadcast_source_stream *source_stream)
 {
@@ -469,8 +473,8 @@ int main(void)
 	/* Broadcast Audio Streaming Endpoint advertising data */
 	NET_BUF_SIMPLE_DEFINE(ad_buf, BT_UUID_SIZE_16 + BT_AUDIO_BROADCAST_ID_SIZE);
 	NET_BUF_SIMPLE_DEFINE(base_buf, 128);
-	struct bt_data ext_ad[2];
-	struct bt_data per_ad;
+	struct bt_data ext_ad[3];
+	struct bt_data per_ad[1];
 	uint32_t broadcast_id;
 
 	/* Create a connectable advertising set */
@@ -512,7 +516,9 @@ int main(void)
 	ext_ad[0].data = ad_buf.data;
 	ext_ad[1] = (struct bt_data)BT_DATA(BT_DATA_BROADCAST_NAME, CONFIG_BT_DEVICE_NAME,
 						sizeof(CONFIG_BT_DEVICE_NAME) - 1);
-	err = bt_le_ext_adv_set_data(adv, ext_ad, 2, NULL, 0);
+	ext_ad[2] = (struct bt_data) BT_DATA(BT_DATA_MANUFACTURER_DATA, ad_data_1, sizeof(ad_data_1));
+						
+	err = bt_le_ext_adv_set_data(adv, ext_ad, ARRAY_SIZE(ext_ad), NULL, 0);
 	if (err != 0) {
 		printk("Failed to set extended advertising data: %d\n", err);
 		return 0;
@@ -525,10 +531,10 @@ int main(void)
 		return 0;
 	}
 
-	per_ad.type = BT_DATA_SVC_DATA16;
-	per_ad.data_len = base_buf.len;
-	per_ad.data = base_buf.data;
-	err = bt_le_per_adv_set_data(adv, &per_ad, 1);
+	per_ad[0].type = BT_DATA_SVC_DATA16;
+	per_ad[0].data_len = base_buf.len;
+	per_ad[0].data = base_buf.data;
+	err = bt_le_per_adv_set_data(adv, per_ad, ARRAY_SIZE(per_ad));
 	if (err != 0) {
 		printk("Failed to set periodic advertising data: %d\n", err);
 		return 0;
