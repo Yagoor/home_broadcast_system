@@ -55,7 +55,21 @@ BUILD_ASSERT(CONFIG_BT_ISO_TX_BUF_COUNT >= TOTAL_BUF_NEEDED,
 
 static struct bt_bap_lc3_preset preset_active = BT_BAP_LC3_BROADCAST_PRESET_16_2_1(
 	BT_AUDIO_LOCATION_FRONT_LEFT | BT_AUDIO_LOCATION_FRONT_RIGHT,
-	BT_AUDIO_CONTEXT_TYPE_MEDIA);
+	BT_AUDIO_CONTEXT_TYPE_UNSPECIFIED);
+
+static uint8_t left_stream[] = {
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FREQ, (BT_AUDIO_CODEC_CFG_FREQ_16KHZ)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_DURATION, (BT_AUDIO_CODEC_CFG_DURATION_10)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_CHAN_ALLOC, BT_BYTES_LIST_LE32(BT_AUDIO_LOCATION_FRONT_LEFT)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FRAME_LEN, BT_BYTES_LIST_LE16(40U)),
+};
+
+static uint8_t right_stream[] = {
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FREQ, (BT_AUDIO_CODEC_CFG_FREQ_16KHZ)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_DURATION, (BT_AUDIO_CODEC_CFG_DURATION_10)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_CHAN_ALLOC, BT_BYTES_LIST_LE32(BT_AUDIO_LOCATION_FRONT_RIGHT)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FRAME_LEN, BT_BYTES_LIST_LE16(40U)),
+};
 
 #define BROADCAST_SAMPLE_RATE 16000
 
@@ -63,15 +77,44 @@ static struct bt_bap_lc3_preset preset_active = BT_BAP_LC3_BROADCAST_PRESET_16_2
 
 static struct bt_bap_lc3_preset preset_active = BT_BAP_LC3_BROADCAST_PRESET_24_2_1(
 	BT_AUDIO_LOCATION_FRONT_LEFT | BT_AUDIO_LOCATION_FRONT_RIGHT,
-	BT_AUDIO_CONTEXT_TYPE_MEDIA);
+	BT_AUDIO_CONTEXT_TYPE_UNSPECIFIED);
+
+static uint8_t left_stream[] = {
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FREQ, (BT_AUDIO_CODEC_CFG_FREQ_24KHZ)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_DURATION, (BT_AUDIO_CODEC_CFG_DURATION_10)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_CHAN_ALLOC, BT_BYTES_LIST_LE32(BT_AUDIO_LOCATION_FRONT_LEFT)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FRAME_LEN, BT_BYTES_LIST_LE16(60U)),
+};
+
+static uint8_t right_stream[] = {
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FREQ, (BT_AUDIO_CODEC_CFG_FREQ_24KHZ)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_DURATION, (BT_AUDIO_CODEC_CFG_DURATION_10)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_CHAN_ALLOC, BT_BYTES_LIST_LE32(BT_AUDIO_LOCATION_FRONT_RIGHT)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FRAME_LEN, BT_BYTES_LIST_LE16(60U)),
+};
 
 #define BROADCAST_SAMPLE_RATE 24000
 
 #elif defined(CONFIG_BAP_BROADCAST_48_2_1)
 
-static struct bt_bap_lc3_preset preset_active = BT_BAP_LC3_BROADCAST_PRESET_48_2_1(
-	BT_AUDIO_LOCATION_FRONT_LEFT | BT_AUDIO_LOCATION_FRONT_RIGHT,
-	BT_AUDIO_CONTEXT_TYPE_MEDIA	);
+static struct bt_bap_lc3_preset preset_active = BT_BAP_LC3_PRESET(BT_AUDIO_CODEC_LC3_CONFIG(BT_AUDIO_CODEC_CFG_FREQ_48KHZ,
+						    BT_AUDIO_CODEC_CFG_DURATION_10, BT_AUDIO_LOCATION_FRONT_LEFT | BT_AUDIO_LOCATION_FRONT_RIGHT, 100U, 1,
+						    BT_AUDIO_CONTEXT_TYPE_UNSPECIFIED),
+			  BT_BAP_QOS_CFG_UNFRAMED(10000u, 100u, 4u, 20u, 80000u));
+
+static uint8_t left_stream[] = {
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FREQ, (BT_AUDIO_CODEC_CFG_FREQ_48KHZ)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_DURATION, (BT_AUDIO_CODEC_CFG_DURATION_10)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_CHAN_ALLOC, BT_BYTES_LIST_LE32(BT_AUDIO_LOCATION_FRONT_LEFT)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FRAME_LEN, BT_BYTES_LIST_LE16(100U)),
+};
+
+static uint8_t right_stream[] = {
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FREQ, (BT_AUDIO_CODEC_CFG_FREQ_48KHZ)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_DURATION, (BT_AUDIO_CODEC_CFG_DURATION_10)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_CHAN_ALLOC, BT_BYTES_LIST_LE32(BT_AUDIO_LOCATION_FRONT_RIGHT)),
+		BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_FRAME_LEN, BT_BYTES_LIST_LE16(100U)),
+};
 
 #define BROADCAST_SAMPLE_RATE 48000
 
@@ -155,8 +198,6 @@ static K_SEM_DEFINE(sem_started, 0U, ARRAY_SIZE(streams));
 static K_SEM_DEFINE(sem_stopped, 0U, ARRAY_SIZE(streams));
 
 #define BROADCAST_SOURCE_LIFETIME 120U /* seconds */
-#define LF_ID_MSB ((BT_COMP_ID_LF >> 8) & 0xff)
-#define LF_ID_LSB ((BT_COMP_ID_LF) & 0xff)
 
 static int freq_hz;
 static int frame_duration_us;
@@ -165,7 +206,20 @@ static int octets_per_frame;
 
 static K_SEM_DEFINE(lc3_encoder_sem, 0U, TOTAL_BUF_NEEDED);
 
-static uint8_t ad_data_1[] = {LF_ID_MSB, LF_ID_LSB, 'Z', 'e', 'p', 'h', 'y', 'r'};
+static uint8_t ad_data_1[] = {0x57, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+								0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+								0x00, 0x00, 0xDF, 0xFD};
+
+static uint8_t per_ad_data_1[] = {0xDF, 0xFD, 0x02, 0x02, 0x00};
+static uint8_t per_ad_data_2[] = {0x81, 0x00, 0x00, 0x00, 0x08, 0x08, 0x24,
+									0x70, 0x02, 0x00, 0x70, 0x02, 0x40, 0x64,
+									0x00, 0x6C, 0xED, 0x9C, 0x6C, 0x10, 0x27,
+									0x40, 0x06, 0x33, 0x33, 0xFF, 0xFF, 0xFF,
+									0xFF, 0x3F, 0xAF, 0x0D, 0x00, 0x00, 0x00,
+									0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+									0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+									0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+									0x00, 0x00};
 
 static void send_data(struct broadcast_source_stream *source_stream)
 {
@@ -195,7 +249,6 @@ static void send_data(struct broadcast_source_stream *source_stream)
 	if (size < sizeof(send_pcm_data)) {
 		const size_t padding_size = sizeof(send_pcm_data) - size;
 
-		printk("Not enough bytes ready, padding %d!\n", padding_size);
 		memset(&((uint8_t *)send_pcm_data)[size], 0, padding_size);
 	}
 #endif
@@ -379,10 +432,6 @@ static int setup_broadcast_source(struct bt_bap_broadcast_source **source)
 		subgroup_param[CONFIG_BT_BAP_BROADCAST_SRC_SUBGROUP_COUNT];
 	struct bt_bap_broadcast_source_param create_param = {0};
 	const size_t streams_per_subgroup = ARRAY_SIZE(stream_params) / ARRAY_SIZE(subgroup_param);
-	uint8_t left[] = {BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_CHAN_ALLOC,
-					      BT_BYTES_LIST_LE32(BT_AUDIO_LOCATION_FRONT_LEFT))};
-	uint8_t right[] = {BT_AUDIO_CODEC_DATA(BT_AUDIO_CODEC_CFG_CHAN_ALLOC,
-					       BT_BYTES_LIST_LE32(BT_AUDIO_LOCATION_FRONT_RIGHT))};
 	int err;
 
 	for (size_t i = 0U; i < ARRAY_SIZE(subgroup_param); i++) {
@@ -393,8 +442,8 @@ static int setup_broadcast_source(struct bt_bap_broadcast_source **source)
 
 	for (size_t j = 0U; j < ARRAY_SIZE(stream_params); j++) {
 		stream_params[j].stream = &streams[j].stream;
-		stream_params[j].data = j == 0 ? left : right;
-		stream_params[j].data_len = j == 0 ? sizeof(left) : sizeof(right);
+		stream_params[j].data = j == 0 ? left_stream : right_stream;
+		stream_params[j].data_len = j == 0 ? sizeof(left_stream) : sizeof(right_stream);
 		bt_bap_stream_cb_register(stream_params[j].stream, &stream_ops);
 	}
 
@@ -474,7 +523,7 @@ int main(void)
 	NET_BUF_SIMPLE_DEFINE(ad_buf, BT_UUID_SIZE_16 + BT_AUDIO_BROADCAST_ID_SIZE);
 	NET_BUF_SIMPLE_DEFINE(base_buf, 128);
 	struct bt_data ext_ad[3];
-	struct bt_data per_ad[1];
+	struct bt_data per_ad[3];
 	uint32_t broadcast_id;
 
 	/* Create a connectable advertising set */
@@ -517,7 +566,7 @@ int main(void)
 	ext_ad[1] = (struct bt_data)BT_DATA(BT_DATA_BROADCAST_NAME, CONFIG_BT_DEVICE_NAME,
 						sizeof(CONFIG_BT_DEVICE_NAME) - 1);
 	ext_ad[2] = (struct bt_data) BT_DATA(BT_DATA_MANUFACTURER_DATA, ad_data_1, sizeof(ad_data_1));
-						
+
 	err = bt_le_ext_adv_set_data(adv, ext_ad, ARRAY_SIZE(ext_ad), NULL, 0);
 	if (err != 0) {
 		printk("Failed to set extended advertising data: %d\n", err);
@@ -534,6 +583,9 @@ int main(void)
 	per_ad[0].type = BT_DATA_SVC_DATA16;
 	per_ad[0].data_len = base_buf.len;
 	per_ad[0].data = base_buf.data;
+	per_ad[1] = (struct bt_data) BT_DATA(BT_DATA_MANUFACTURER_DATA, per_ad_data_1, sizeof(per_ad_data_1));
+	per_ad[2] = (struct bt_data) BT_DATA(BT_DATA_MANUFACTURER_DATA, per_ad_data_2, sizeof(per_ad_data_2));
+
 	err = bt_le_per_adv_set_data(adv, per_ad, ARRAY_SIZE(per_ad));
 	if (err != 0) {
 		printk("Failed to set periodic advertising data: %d\n", err);
